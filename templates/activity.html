@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    .tabs {
+        display: flex;
+        gap: 40px;
+        margin-bottom: 25px;
+        font-size: 22px;
+        font-weight: 700;
+    }
+    .tab {
+        color: #777;
+        cursor: pointer;
+        text-decoration: none;
+        padding-bottom: 3px;
+    }
+    .active {
+        color:#4a64ff;
+        border-bottom: 3px solid #4a64ff;
+    }
+
+    .card-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 25px;
+    }
+
+    .card {
+        background:white;
+        border-radius:14px;
+        padding:20px;
+        box-shadow:0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .star { color:#ffb400; font-size:20px; }
+
+    .btn {
+        background:#4a64ff;
+        color:white;
+        border:none;
+        padding:10px;
+        border-radius:8px;
+        width:100%;
+        margin-top:10px;
+        cursor:pointer;
+    }
+    .btn-outline {
+        background:white;
+        border:2px solid #4a64ff;
+        padding:10px;
+        border-radius:8px;
+        width:100%;
+        color:#4a64ff;
+        margin-top:10px;
+        cursor:pointer;
+    }
+    .btn-gray {
+        background:#ddd;
+        color:#555;
+        border:none;
+        padding:10px;
+        border-radius:8px;
+        width:100%;
+        margin-top:10px;
+        cursor:default;
+        text-align:center;
+    }
+</style>
+
+<!-- ========================= -->
+<!--        TAB MENU           -->
+<!-- ========================= -->
+<div class="tabs">
+    <a href="/activity?view=all" class="tab {% if view=='all' %}active{% endif %}">전체 활동</a>
+    <a href="/activity?view=liked" class="tab {% if view=='liked' %}active{% endif %}">찜한 활동</a>
+    <a href="/activity?view=applied" class="tab {% if view=='applied' %}active{% endif %}">신청한 활동</a>
+</div>
+
+<!-- ========================= -->
+<!--      ACTIVITY LIST        -->
+<!-- ========================= -->
+<div class="card-grid">
+
+{% for act in activities %}
+    <div class="card">
+
+        <h3>{{ act[1] }}</h3>
+        <p style="color:#557;">{{ act[2] }}</p>
+
+        <p style="margin-top:6px;">{{ act[3] }}</p>
+
+        <p style="margin-top:6px; font-size:14px;">
+            📅 {{ act[4] }} ~ {{ act[5] }}
+        </p>
+
+        <p style="margin-top:6px; font-size:14px;">
+            👥 {{ act[7] }}/{{ act[6] }} 명 참여중
+        </p>
+
+        {% set score = act[8] if act[8] and act[8] > 0 else 1 %}
+        <div style="margin-top:10px; font-size:20px;">
+            {% for i in range(1, 6) %}
+                {% if i <= score %}
+                    <span class="star">★</span>
+                {% else %}
+                    <span class="star" style="color:#ddd;">★</span>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        {% if act[9] %}
+        <p style="margin-top:6px; font-size:14px;">
+            <span style="font-weight:600;">추천 이유:</span> {{ act[9] }}
+        </p>
+        {% endif %}
+
+        <!-- 찜하기 -->
+        <form method="POST" action="/activity/favorite/{{ act[0] }}">
+            {% if act[0] in liked %}
+                <button class="btn-gray">♥ 찜 해제</button>
+            {% else %}
+                <button class="btn-outline">♡ 찜하기</button>
+            {% endif %}
+        </form>
+
+        <!-- ============================= -->
+        <!--        신청 상태 처리        -->
+        <!-- ============================= -->
+        {% if act[0] in applied %}
+
+            {% if applied[act[0]] == 'pending' %}
+                <div class="btn-gray">대기 중</div>
+
+                <form method="POST" action="/activity/cancel/{{ act[0] }}">
+                    <button class="btn-outline" style="margin-top:8px;">지원 취소</button>
+                </form>
+
+            {% elif applied[act[0]] == 'accepted' %}
+                <button class="btn-gray">참여 확정</button>
+
+            {% elif applied[act[0]] == 'rejected' %}
+                <button class="btn-gray">거절됨</button>
+
+            {% endif %}
+
+        {% else %}
+            <!-- 신청 안 했을 때 -->
+            <form method="POST" action="/activity/apply/{{ act[0] }}">
+                <button class="btn">지원하기</button>
+            </form>
+        {% endif %}
+
+    </div>
+{% endfor %}
+
+</div>
+
+{% endblock %}

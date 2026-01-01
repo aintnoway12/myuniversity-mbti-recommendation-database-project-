@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    .tabs { display: flex; gap: 40px; margin-bottom: 25px; font-size: 22px; font-weight: 700; }
+    .tab { color: #777; cursor: pointer; text-decoration: none; }
+    .active { color:#4a64ff; border-bottom: 3px solid #4a64ff; padding-bottom:3px; }
+
+    .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; }
+    .card {
+        background:white; border-radius:14px; padding:20px;
+        box-shadow:0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .star { color:#ffb400; font-size:20px; }
+
+    .btn { background:#4a64ff; color:white; border:none; padding:10px; border-radius:8px; width:100%; margin-top:10px; cursor:pointer; }
+    .btn-outline { background:white; border:2px solid #4a64ff; padding:10px; border-radius:8px; width:100%; color:#4a64ff; margin-top:10px; cursor:pointer; }
+    .btn-gray { background:#ddd; color:#555; border:none; padding:10px; border-radius:8px; width:100%; margin-top:10px; cursor:default; }
+</style>
+
+<!-- ========================= -->
+<!--        TAB MENU           -->
+<!-- ========================= -->
+<div class="tabs">
+    <a href="/club?view=all" class="tab {% if view=='all' %}active{% endif %}">전체 동아리</a>
+    <a href="/club?view=liked" class="tab {% if view=='liked' %}active{% endif %}">찜한 동아리</a>
+    <a href="/club?view=applied" class="tab {% if view=='applied' %}active{% endif %}">지원한 동아리</a>
+</div>
+
+<!-- ========================= -->
+<!--        CLUB CARDS         -->
+<!-- ========================= -->
+<div class="card-grid">
+
+{% for c in clubs %}
+    <div class="card">
+
+        <h3>{{ c.name }}</h3>
+
+        <p style="color:#555;">유형: {{ c.type }}</p>
+        <p style="color:#555;">활동 빈도: {{ c.frequency }}</p>
+        <p>정원: {{ c.current }}/{{ c.max }}</p>
+
+        <p>{{ c.description }}</p>
+
+        <!-- ⭐ MBTI 추천 점수 (0 또는 None → 1점 보정) -->
+        {% set score = c.rating if c.rating and c.rating > 0 else 1 %}
+
+        <!-- ⭐ 5개 고정 별 표시 -->
+        <div style="margin:10px 0; font-size:20px;">
+            {% for i in range(1, 6) %}
+                {% if i <= score %}
+                    <span class="star">★</span>
+                {% else %}
+                    <span class="star" style="color:#ddd;">★</span>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- ✨ 추천 설명 -->
+        <p style="font-size:14px; color:#777;">
+            {{ c.reason if c.reason else "추천 이유 없음" }}
+        </p>
+
+        <!-- 찜하기 -->
+        <form method="POST" action="/club/favorite/{{ c.club_id }}">
+            {% if c.club_id in liked_clubs %}
+                <button class="btn-gray">♥ 찜 취소</button>
+            {% else %}
+                <button class="btn-outline">♡ 찜하기</button>
+            {% endif %}
+        </form>
+
+        <!-- 지원 상태 표시 -->
+        {% if c.club_id in applied %}
+            {% set status = applied[c.club_id] %}
+
+            {% if status == 'pending' %}
+                <button class="btn-gray">대기 중</button>
+                <form method="POST" action="/club/cancel/{{ c.club_id }}">
+                    <button class="btn-outline">지원 취소</button>
+                </form>
+
+            {% elif status == 'approved' %}
+                <button class="btn-gray">승인됨</button>
+
+            {% elif status == 'rejected' %}
+                <button class="btn-gray">거절됨</button>
+            {% endif %}
+
+        {% else %}
+            <form method="POST" action="/club/apply/{{ c.club_id }}">
+                <button class="btn">📩 지원하기</button>
+            </form>
+        {% endif %}
+
+    </div>
+{% endfor %}
+
+</div>
+
+{% endblock %}

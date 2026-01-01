@@ -1,0 +1,172 @@
+{% extends "base_no_nav.html" %}
+{% block content %}
+
+<h2 class="section-title">Leader Dashboard</h2>
+
+<!-- Tabs -->
+<div class="tabs">
+    <div class="tab active" id="tab-info" onclick="showTab('info')">클럽 정보</div>
+    <div class="tab" id="tab-notice" onclick="showTab('notice')">공지사항</div>
+    <div class="tab" id="tab-applicants" onclick="showTab('applicants')">지원자 목록</div>
+    <div class="tab" id="tab-members" onclick="showTab('members')">멤버 관리</div>
+    <div class="tab" id="tab-activity" onclick="showTab('activity')">활동 기록</div>
+</div>
+
+<script>
+function showTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(s => s.style.display = 'none');
+
+    document.getElementById("tab-" + name).classList.add("active");
+    document.getElementById("content-" + name).style.display = "block";
+}
+document.addEventListener("DOMContentLoaded", () => showTab("info"));
+</script>
+
+<style>
+.tabs { display:flex; gap:30px; margin-bottom:20px; font-size:20px; font-weight:700; }
+.tab { cursor:pointer; color:#666; padding-bottom:6px; }
+.tab.active { color:#4a64ff; border-bottom:3px solid #4a64ff; }
+.card { background:white; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); margin-bottom:20px; }
+</style>
+
+<!-- ========================= 1) 클럽 정보 ========================= -->
+<div class="tab-content" id="content-info">
+
+    <h3>클럽 정보 수정</h3>
+
+    <div class="card">
+        <form method="POST" action="/leader/club/edit/{{ club.club_id }}">
+            <div class="form-group">
+                <label class="form-label">동아리 이름</label>
+                <input class="form-input" name="name" value="{{ club.name }}">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">유형</label>
+                <input class="form-input" name="type" value="{{ club.type }}">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">활동 빈도</label>
+                <input class="form-input" name="activity_frequency" value="{{ club.activity_frequency }}">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">최대 인원</label>
+                <input class="form-input" type="number" name="max_members" value="{{ club.max_members }}">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">설명</label>
+                <textarea class="form-input" name="description">{{ club.description }}</textarea>
+            </div>
+
+            <button class="btn" style="margin-top:12px;">저장하기</button>
+        </form>
+    </div>
+</div>
+
+<!-- ========================= 2) 공지사항 ========================= -->
+<div class="tab-content" id="content-notice" style="display:none;">
+
+    <h3>📢 공지 등록</h3>
+
+    <div class="card">
+        <form method="POST" action="/leader/notice/add">
+            <input type="text" name="title" placeholder="제목" class="form-input" required>
+            <textarea name="content" placeholder="내용" class="form-input" style="height:120px;" required></textarea>
+            <button class="btn" style="width:100%; margin-top:10px;">등록하기</button>
+        </form>
+    </div>
+
+    <h3 style="margin-top:30px;">📄 등록된 공지</h3>
+
+    {% for n in notices %}
+    <div class="card">
+        <h4>{{ n.title }}</h4>
+        <p>{{ n.content }}</p>
+        <small>{{ n.created_at }}</small>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- ========================= 3) 지원자 목록 ========================= -->
+<div class="tab-content" id="content-applicants" style="display:none;">
+
+    <h3>🙋 지원자 목록</h3>
+
+    {% for a in applicants %}
+    <div class="card">
+        <p><b>{{ a.student_id }}</b> 학생 지원</p>
+        <p>상태: {{ a.status }}</p>
+
+        {% if a.status == 'pending' %}
+        <form method="POST" action="/leader/apply/approve/{{ a.log_id }}">
+            <button class="btn">승인</button>
+        </form>
+        <form method="POST" action="/leader/apply/reject/{{ a.log_id }}">
+            <button class="btn-outline" style="margin-top:10px;">거절</button>
+        </form>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<!-- ========================= 4) 멤버 관리 ========================= -->
+<div class="tab-content" id="content-members" style="display:none;">
+
+    <h3>👥 승인된 멤버</h3>
+
+    <table class="table">
+        <tr>
+            <th>이름</th>
+            <th>닉네임</th>
+            <th>가입일</th>
+            <th>관리</th>
+        </tr>
+
+        {% for m in members %}
+        <tr>
+            <td>{{ m.name }}</td>
+            <td>{{ m.nickname }}</td>
+            <td>{{ m.joined_date }}</td>
+            <td>
+                <form method="POST" action="/leader/member/kick/{{ m.membership_id }}">
+                    <button class="btn-warning btn">강퇴</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<!-- ========================= 5) 활동 기록 ========================= -->
+<div class="tab-content" id="content-activity" style="display:none;">
+
+    <h3>📝 활동 기록 추가</h3>
+    <div class="card">
+        <form method="POST" action="/leader/activity/add">
+            <input type="text" name="title" class="form-input" placeholder="활동 제목" required>
+            <textarea name="content" class="form-input" placeholder="활동 내용" style="height:120px;" required></textarea>
+            <button class="btn" style="width:100%; margin-top:10px;">등록</button>
+        </form>
+    </div>
+
+    <h3 style="margin-top:30px;">기록된 활동</h3>
+
+    {% for act in activities %}
+    <div class="card">
+        <h4>{{ act.title }}</h4>
+        <p>{{ act.content }}</p>
+        <small>{{ act.created_at }}</small>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- ========================= 로그아웃 ========================= -->
+<div style="text-align:center; margin-top:40px;">
+    <a href="/logout" class="btn-outline" style="width:200px; display:inline-block;">로그아웃</a>
+</div>
+
+{% endblock %}

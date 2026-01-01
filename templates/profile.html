@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card" style="max-width:550px; margin:auto;">
+
+    <h2 class="section-title" style="text-align:center;">My Profile</h2>
+
+    <form method="POST">
+
+        <div class="form-group">
+            <label class="form-label">Nickname</label>
+            <input class="form-input" name="nickname" value="{{ nickname }}">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">MBTI</label>
+            <select class="form-input" name="mbti">
+                {% for m in mbti_list %}
+                    <option value="{{ m }}" {% if mbti==m %}selected{% endif %}>{{ m }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Major</label>
+            <select class="form-input" name="major_id">
+                {% for mj in major_list %}
+                    <option value="{{ mj[0] }}" {% if major_id==mj[0] %}selected{% endif %}>{{ mj[1] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Year</label>
+            <select class="form-input" name="year_level">
+                {% for y in year_list %}
+                    <option value="{{ y }}" {% if year_level==y %}selected{% endif %}>{{ y }}학년</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <label>Preferred Time</label>
+<select name="preferred_time">
+    <option value="any" {% if preferred_time == 'any' %}selected{% endif %}>상관 없음</option>
+    <option value="morning" {% if preferred_time == 'morning' %}selected{% endif %}>아침 (09:00~12:00)</option>
+    <option value="afternoon" {% if preferred_time == 'afternoon' %}selected{% endif %}>오후 (12:00~17:00)</option>
+    <option value="evening" {% if preferred_time == 'evening' %}selected{% endif %}>저녁 (17:00~21:00)</option>
+</select>
+
+
+        <button class="btn" style="width:100%; margin-top:15px;">Save Changes</button>
+
+    </form>
+
+    <a href="/logout" class="btn-outline" style="margin-top:15px; display:block; text-align:center;">Logout</a>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 class="section-title">✨ 내가 관리하는 동아리</h2>
+
+<div class="card-grid">
+{% for c in clubs %}
+    <div class="card card-small">
+
+        <h3>{{ c[1] }}</h3>
+
+        <p style="color:#666; margin-top:6px;">
+            유형: {{ c[2] }}<br>
+            인원: {{ c[3] }}/{{ c[4] }}
+        </p>
+
+        <a href="/club/manage/{{ c[0] }}" class="btn" style="width:100%; margin-top:12px;">
+            관리하기 →
+        </a>
+
+    </div>
+{% endfor %}
+</div>
+
+{% endblock %}

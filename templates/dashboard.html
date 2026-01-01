@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- ======= 시간표 생성하기 버튼 (맨 위) ======= -->
+<div style="text-align:right; margin-bottom:25px;">
+    <a href="/generate-timetable" class="btn"
+       style="padding:12px 22px; font-size:18px; background:#4a64ff; color:white; border-radius:10px;">
+        📅 시간표 자동 생성하기
+    </a>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+    <div class="tab active" id="tab-major" onclick="showSection('major')">전공 추천</div>
+    <div class="tab" id="tab-minor" onclick="showSection('minor')">부전공 추천</div>
+    <div class="tab" id="tab-like" onclick="showSection('like')">찜한 강의</div>
+</div>
+
+<script>
+function showSection(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+
+    document.getElementById('tab-' + name).classList.add('active');
+    document.getElementById('section-' + name).style.display = 'block';
+}
+document.addEventListener("DOMContentLoaded", () => showSection("major"));
+</script>
+
+
+<!-- ========================= 전공 추천 ========================= -->
+<div class="section" id="section-major">
+
+    <h2 class="section-title">전공 추천 강의</h2>
+
+    {% for cat, items in major_by_year.items() %}
+        <h3 style="margin-bottom:10px;">{{ cat }} 과목</h3>
+
+        <div class="card-grid">
+        {% for c in items %}
+            {% set stars = (c.score|int // 20) %}
+            {% set score = stars if stars > 0 else 1 %}
+
+            <div class="card card-small">
+
+                <!-- ⭐ 별 출력 (5개 고정) -->
+                <div class="star-score">
+                    {% for i in range(1, 6) %}
+                        {% if i <= score %}★
+                        {% else %}<span style="color:#ddd;">★</span>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <div class="category-tag">전공 · {{ cat }}</div>
+
+                <h3>{{ c.name }}</h3>
+                <p>{{ c.day }} | {{ c.start }} ~ {{ c.end }}</p>
+                <p style="margin-top:6px;">{{ c.description }}</p>
+
+                <form method="post" action="/toggle-like">
+                    <input type="hidden" name="lecture_id" value="{{ c.lecture_id }}">
+                    <button class="btn-outline" style="margin-top:10px;">♡ 찜하기</button>
+                </form>
+            </div>
+        {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+
+
+<!-- ========================= 부전공 추천 ========================= -->
+<div class="section" id="section-minor" style="display:none;">
+
+    <h2 class="section-title">부전공 추천 강의</h2>
+
+    {% for minor_name, items in minor_filtered.items() %}
+        {% if items|length > 0 %}
+        <h3 style="margin-bottom:10px;">{{ minor_name }}</h3>
+
+        <div class="card-grid">
+        {% for c in items %}
+            {% set stars = (c.score|int // 20) %}
+            {% set score = stars if stars > 0 else 1 %}
+
+            <div class="card card-small">
+                <div class="star-score">
+                    {% for i in range(1, 6) %}
+                        {% if i <= score %}★
+                        {% else %}<span style="color:#ddd;">★</span>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <div class="minor-tag">부전공 · {{ minor_name }}</div>
+
+                <h3>{{ c.name }}</h3>
+                <p>{{ c.day }} | {{ c.start }} ~ {{ c.end }}</p>
+                <p style="margin-top:6px;">{{ c.description }}</p>
+
+                <form method="post" action="/toggle-like">
+                    <input type="hidden" name="lecture_id" value="{{ c.lecture_id }}">
+                    <button class="btn-outline" style="margin-top:10px;">♡ 찜하기</button>
+                </form>
+            </div>
+        {% endfor %}
+        </div>
+        {% endif %}
+    {% endfor %}
+</div>
+
+
+<!-- ========================= 찜한 강의 ========================= -->
+<div class="section" id="section-like" style="display:none;">
+
+    <h2 class="section-title">내가 찜한 강의</h2>
+
+    <div class="card-grid">
+    {% for c in liked_courses %}
+        {% set stars = (c.score|int // 20) %}
+        {% set score = stars if stars > 0 else 1 %}
+
+        <div class="card card-small">
+            <div class="star-score">
+                {% for i in range(1, 6) %}
+                    {% if i <= score %}★
+                    {% else %}<span style="color:#ddd;">★</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <h3>{{ c.name }}</h3>
+            <p>{{ c.day }} | {{ c.start }} ~ {{ c.end }}</p>
+            <p style="margin-top:6px;">{{ c.description }}</p>
+
+            <form method="post" action="/toggle-like">
+                <input type="hidden" name="lecture_id" value="{{ c.lecture_id }}">
+                <button class="btn-outline" style="margin-top:10px;">♡ 찜 해제</button>
+            </form>
+        </div>
+    {% endfor %}
+    </div>
+
+</div>
+
+{% endblock %}

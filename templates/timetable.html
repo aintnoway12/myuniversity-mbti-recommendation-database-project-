@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    .title {
+        font-size: 32px;
+        font-weight: 800;
+        text-align: center;
+        margin: 25px 0;
+        color: #3f51ff;
+    }
+
+    .timetable-container {
+        display: grid;
+        grid-template-columns: 120px repeat(5, 1fr);
+        gap: 10px;
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .time-cell {
+        height: 60px;
+        border-right: 1px solid #ddd;
+        font-size: 14px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #666;
+    }
+
+    .day-header {
+        font-size: 20px;
+        font-weight: 700;
+        text-align: center;
+        padding: 10px 0;
+        background: #eef1ff;
+        border-radius: 8px;
+        color: #3f51ff;
+    }
+
+    .day-column {
+        position: relative;
+        height: 900px;
+        border-left: 1px solid #ddd;
+        border-right: 1px solid #ddd;
+        background: #fafafa;
+        border-radius: 10px;
+    }
+
+    .lecture-box {
+        position: absolute;
+        width: 90%;
+        margin-left: 5%;
+        border-radius: 10px;
+        padding: 10px;
+        color: #333;
+        font-size: 14px;
+        font-weight: 600;
+        box-shadow: 0px 3px 8px rgba(0,0,0,0.15);
+    }
+
+    .lecture-title {
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .lecture-info {
+        font-size: 12px;
+        margin-top: 2px;
+        opacity: 0.85;
+    }
+</style>
+
+<h2 class="title">📅 자동 생성된 시간표</h2>
+
+<div class="timetable-container">
+
+    <!-- 왼쪽 시간 표시 -->
+    <div>
+        {% for t in range(8, 20) %}
+            <div class="time-cell">{{ t }}:00</div>
+        {% endfor %}
+    </div>
+
+    <!-- 요일별 칼럼 -->
+    {% for day, items in timetable.items() %}
+        <div>
+            <div class="day-header">{{ day }}</div>
+
+            <div class="day-column">
+                {% for lec in items %}
+                    {% set top = ((lec.start - 480) * 2) %}
+                    {% set height = ((lec.end - lec.start) * 2) %}
+                    {% set color = "hsl(" ~ ((loop.index * 57) % 360) ~ ",75%,85%)" %}
+
+                    <div class="lecture-box"
+                         style="top:{{ top }}px; height:{{ height }}px; background:{{ color }};">
+                        <div class="lecture-title">{{ lec.name }}</div>
+                        <div class="lecture-info">🕒 {{ lec.start_label }} ~ {{ lec.end_label }}</div>
+                        <div class="lecture-info">👨‍🏫 {{ lec.professor }}</div>
+                        <div class="lecture-info">🏫 {{ lec.room }}</div>
+                        <div class="lecture-info">{{ lec.desc }}</div>
+                    </div>
+                {% endfor %}
+            </div>
+
+        </div>
+    {% endfor %}
+
+</div>
+
+{% endblock %}

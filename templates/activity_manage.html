@@ -1,0 +1,104 @@
+{% extends "base_no_nav.html" %}
+{% block content %}
+
+<h2 class="section-title"> 활동 관리 — {{ activity[1] }}</h2>
+
+<!-- 활동 정보 카드 -->
+<div class="card" style="margin-bottom:30px;">
+    <p><b>유형:</b> {{ activity[2] }}</p>
+    <p><b>설명:</b> {{ activity[3] }}</p>
+    <p><b>날짜:</b> {{ activity[4] }} ~ {{ activity[5] }}</p>
+    <p><b>참여자:</b> {{ activity[7] }}/{{ activity[6] }}</p>
+</div>
+
+<hr>
+
+<!-- 참여자 검색 -->
+<h3 class="section-title">🔍 참여자 검색</h3>
+<form method="GET" action="/staff/activity/{{ activity[0] }}">
+    <input class="form-input" type="text" name="search" placeholder="이름 / 닉네임 / 학번 검색"
+           value="{{ keyword }}" style="width:300px;">
+    <button class="btn" style="margin-left:10px;">검색</button>
+</form>
+
+<hr>
+
+<!-- 참여자 목록 -->
+<h3 class="section-title">참여자 목록</h3>
+
+<table class="table">
+    <tr>
+        <th>학번</th>
+        <th>이름</th>
+        <th>닉네임</th>
+        <th>상태</th>
+        <th>신청일</th>
+        <th>관리</th>
+    </tr>
+
+    {% for m in members %}
+    <tr>
+        <td>{{ m[1] }}</td> <!-- student_id -->
+        <td>{{ m[2] }}</td> <!-- name -->
+        <td>{{ m[3] }}</td> <!-- nickname -->
+        <td>{{ m[4] }}</td> <!-- status -->
+        <td>{{ m[5] }}</td> <!-- registered_at -->
+
+        <td>
+            {% if m[4] == 'pending' %}
+                <!-- 승인 -->
+                <form method="POST" action="/staff/activity/{{ activity[0] }}/approve/{{ m[0] }}" style="display:inline;">
+                    <button class="btn-success btn">승인</button>
+                </form>
+
+                <!-- 거절 -->
+                <form method="POST" action="/staff/activity/{{ activity[0] }}/reject/{{ m[0] }}" style="display:inline;">
+                    <button class="btn-danger btn">거절</button>
+                </form>
+            {% else %}
+                {{ m[4] }}
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<hr>
+
+<!-- 활동 수정 폼 -->
+<h3 class="section-title">✏ 활동 수정</h3>
+
+<div class="card">
+    <form method="POST" action="/staff/activity/{{ activity[0] }}/edit">
+
+        <label class="form-label">활동명</label>
+        <input class="form-input" name="name" value="{{ activity[1] }}">
+
+        <label class="form-label">유형</label>
+        <input class="form-input" name="type" value="{{ activity[2] }}">
+
+        <label class="form-label">설명</label>
+        <textarea class="form-input" name="description">{{ activity[3] }}</textarea>
+
+        <label class="form-label">시작 날짜</label>
+        <input type="date" name="start_date" class="form-input" value="{{ activity[4] }}">
+
+        <label class="form-label">종료 날짜</label>
+        <input type="date" name="end_date" class="form-input" value="{{ activity[5] }}">
+
+        <label class="form-label">최대 인원</label>
+        <input type="number" name="max_participants" class="form-input" value="{{ activity[6] }}">
+
+        <button class="btn" style="margin-top:20px;">저장하기</button>
+    </form>
+</div>
+
+<hr>
+
+<div style="text-align:center; margin-top:40px;">
+    <a href="/logout" class="btn-outline" style="width:200px; display:inline-block;">
+        로그아웃
+    </a>
+</div>
+
+{% endblock %}

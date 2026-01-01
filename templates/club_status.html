@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 class="section-title">📋 나의 동아리 지원 현황</h2>
+
+<table class="table">
+    <tr>
+        <th>동아리명</th>
+        <th>유형</th>
+        <th>설명</th>
+        <th>상태</th>
+        <th>지원 날짜</th>
+    </tr>
+
+    {% for row in rows %}
+    <tr class="table-row">
+        <td>{{ row[1] }}</td>
+        <td>{{ row[2] }}</td>
+        <td>{{ row[3] }}</td>
+
+        <td>
+            {% if row[4]=='pending' %}
+                ⏳ 대기 중
+            {% elif row[4]=='approved' %}
+                ✅ 승인됨
+            {% elif row[4]=='rejected' %}
+                ❌ 거절됨
+            {% endif %}
+        </td>
+
+        <td>{{ row[5] }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
